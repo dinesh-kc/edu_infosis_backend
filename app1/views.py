@@ -1,13 +1,13 @@
 from django.shortcuts import render
 #from django.contrib.auth.models import StdRegister
-from app1.models import User, Student,Teacher,Class, ClassStudent,Parents,Accountant,Section,SectionStudent,Syllabus
+from app1.models import User, Student,Teacher,Class, ClassStudent,Parents,Accountant,Section,SectionStudent,Syllabus,Subject
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from app1.serializers import StudentSerializer,TeacherSerializer, \
 ClassSerializer,ClassStudentSerializer,ParentSerializer,AccountantSerializer,SectionSerializer,\
-SectionStudentSerializer,SyllabusSerializer
+SectionStudentSerializer,SyllabusSerializer,SubjectSerializer
 
 class StudentViewset(viewsets.ModelViewSet):
     queryset = Student.objects.all()
@@ -221,14 +221,26 @@ class SectionStudentViewset(viewsets.ModelViewSet):
 class SyllabusViewset(viewsets.ModelViewSet):
     queryset = Syllabus.objects.all()
     serializer_class = SyllabusSerializer
-    
-    def create(self,request,class_pk):
+
+    def create(self,request,Class_pk):
         serializer=self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         row=serializer.data
-        Syllabus.objects.get_or_create(class_id=class_pk,defaults={'title':'title','description':'description'})
+        Syllabus.objects.get_or_create(_class_id=Class_pk,defaults={'title':'title','description':'description'})
 
         return Response(row)
+
+
+class SubjectViewset(viewsets.ModelViewSet):
+    queryset=Subject.objects.all()
+    serializer_class=SubjectSerializer
+
+    def create(self,request):
+        serializer=self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        row=serializer.data
+        Subject.objects.get_or_create(syllabus_id=syllabus_id,defaults={'subject_name':'subject_name','description':'description'})
 
     

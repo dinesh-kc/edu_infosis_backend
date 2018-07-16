@@ -1,4 +1,5 @@
-from app1.models import User,Student,Teacher,Class,ClassStudent,Parents,Accountant,Section,SectionStudent,Syllabus
+from app1.models import User,Student,Teacher,Class,ClassStudent,Parents,Accountant,Section,SectionStudent,\
+Syllabus,Subject
 
 from rest_framework import serializers
 
@@ -91,7 +92,17 @@ class SyllabusSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model=Syllabus
 		fields=(
-			'title','description','_class_id',
+			'title','description',
+
+			)
+
+class SubjectSerializer(serializers.HyperlinkedModelSerializer):
+	syllabus_id=serializers.IntegerField()
+	class Meta:
+		model=Subject
+		fields=(
+			'subject_name','description','syllabus_id',
 
 			)
 	
+

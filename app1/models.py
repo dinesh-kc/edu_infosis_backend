@@ -83,13 +83,16 @@ class SectionStudent(BaseModel):
 	sec=models.ForeignKey(Section,on_delete=models.CASCADE)
 	student=models.ForeignKey(Student,on_delete=models.CASCADE)
 
-class Subject(BaseModel):
-	subject_name=models.CharField(max_length=65)
-	description=models.TextField(max_length=120)
 
-class Syllabus:
+class Syllabus(BaseModel):
 	title=models.CharField(max_length=65)
 	description=models.TextField(max_length=13)
 	_class=models.ForeignKey(Class,on_delete=models.CASCADE)
-	#subject=models.ForeignKey(Subject,on_delete=models.CASCADE)
+
+
+class Subject(BaseModel):
+	subject_name=models.CharField(max_length=65)
+	description=models.TextField(max_length=120)
+	syllabus=models.ForeignKey(Syllabus,on_delete=models.CASCADE)
+	
 
