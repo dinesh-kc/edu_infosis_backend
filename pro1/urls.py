@@ -18,6 +18,9 @@ router.register(r'class', views.ClassViewset, 'class')
 router.register(r'section', views.SectionViewset, 'section')
 router.register(r'accountant', views.AccountantViewset)
 router.register(r'subject', views.SubjectViewset)
+router.register(r'routine',views.RoutineViewset)
+router.register(r'marksheet',views.SubjectMarkViewset)
+router.register(r'barcode',views.BarcodeViewset)
 # router.register(r'syllabus',views.SyllabusViewset)
 ##router.register(r'class/(?P<id>[0-9]+)/student',  views.ClassStudentViewset, 'class-student')
 
@@ -32,7 +35,7 @@ class_router.register(r'syllabus', views.ClassSectionViewset, base_name='class-s
 
 section_router = routers.NestedSimpleRouter(router, r'section', lookup='section')
 section_router.register(r'student', views.SectionStudentViewset, base_name='section-students')
-
+section_router.register(r'attendance',views.AttendanceViewset,base_name='section-attendance')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

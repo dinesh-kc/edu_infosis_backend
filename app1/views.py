@@ -1,13 +1,18 @@
 from django.shortcuts import render
 #from django.contrib.auth.models import StdRegister
-from app1.models import User, Student,Teacher,Class, ClassStudent,Parents,Accountant,Section,SectionStudent,Syllabus,Subject
+from app1.models import User, Student,Teacher,Class, ClassStudent,Parents,Accountant,Section,SectionStudent,\
+Syllabus,Subject,Routine,SubjectMarks,SubMarkType,Barcode,Attendance
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.parsers import FormParser, MultiPartParser
+import random
+from app1.modules.barcode import Code128##For Barcode
 
 from app1.serializers import StudentSerializer,TeacherSerializer, \
 ClassSerializer,ClassStudentSerializer,ParentSerializer,AccountantSerializer,SectionSerializer,\
-SectionStudentSerializer,SyllabusSerializer,SubjectSerializer
+SectionStudentSerializer,SyllabusSerializer,SubjectSerializer,RoutineSerializer,SubjectMarksSerializer,\
+BarcodeSerializer,AttendanceSerializer
 
 class StudentViewset(viewsets.ModelViewSet):
     queryset = Student.objects.all()
@@ -180,10 +185,11 @@ class ClassSectionViewset(viewsets.ModelViewSet):
        
         ## to check class id
         try:
-            Class=Class.objects.get(class_pk)
 
-        except:
-            return Response({'message':'sorry'})
+            Class.objects.get(id=class_pk)
+
+        except Exception as ex:
+            return Response({'message':'sorry'+ str(ex)})
         else:
             Section.objects.get_or_create(_class_id=class_pk,section_name=section_name,
             defaults={'section_description':row['section_description']})
@@ -243,4 +249,88 @@ class SubjectViewset(viewsets.ModelViewSet):
         row=serializer.data
         Subject.objects.get_or_create(syllabus_id=syllabus_id,defaults={'subject_name':'subject_name','description':'description'})
 
-    
+class RoutineViewset(viewsets.ModelViewSet):
+    queryset=Routine.objects.all()
+    serializer_class=RoutineSerializer
+
+    def create(self,request):
+        serializer=self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        row=serializer.data
+        try:
+            Section=Section.objects.get(section_pk)
+            Teacher=Teacher.objects.get(teacher_pk)
+            Subject=Subject.objects.get(subject_pk)
+        except:
+            return Response({'message':'sorry id doesnot exist'})
+        else:
+            Routine.objects.get_or_create(section_id=section_pk,subject_id=teacher_pk,teacher_id=subject_pk,
+            defaults={'time_start':row['time_start'],'time_end':row['time_end']})
+            return Response({'message':'created'})
+
+class SubjectMarkViewset(viewsets.ModelViewSet):
+    queryset=Routine.objects.all()
+    serializer_class=SubjectMarksSerializer
+
+    def create(self,request):
+        serializer=self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        row=serializer.data
+        try:
+            SubMarkType=SubMarkType.objects.get(SubMarkType_pk)
+
+        except:
+            return Response({'message':'sorry'})
+        else:
+            SubjectMarks.objects.get_or_create(_type_id=SubMarkType_pk,defaults={obtained_marks:row['obtained_marks'],marks_type:row['marks_type']})
+        return Response({'Created Successfully'})
+
+
+######Barcode#####
+class BarcodeViewset(viewsets.ModelViewSet):
+    queryset=Barcode.objects.all()
+    serializer_class=BarcodeSerializer
+    def create(self,request):
+        upload_dir = 'app1/storage/barcodes/'
+        try:
+            os.makedirs(upload_dir)
+        except:
+            pass
+
+        n = random.random()
+
+        code = 'SMS-%s'%str(n)
+
+        bar = Code128()
+        bar.getImage(code,100,"png", path=upload_dir)
+
+        b, c = Barcode.objects.get_or_create(bar_code=code, defaults={'file':upload_dir+code+'.png'})
+
+        return b
+
+class AttendanceViewset(viewsets.ModelViewSet):
+    queryset=Attendance.objects.all()
+    serializer_class=AttendanceSerializer
+    parser_classes = (FormParser, MultiPartParser)
+
+    def create(self,request,section_pk):
+        #print(request.POST)
+        #print(request.FILES)
+        #serializer=self.get_serializer(data=request.POST)
+        #serializer.is_valid(raise_exception=True)
+
+        files = request.FILES
+
+        row=request.POST #serializer.data
+        try:
+            _Section=Section.objects.get(sec_pk)
+            _Student=Student.objects.get(student_pk)
+        except:
+            return Response("Sorry Sec id And Student id not found")
+        else:
+            Attendance.objects.get_or_create(sec_id=section_pk,student_id=student_pk,defaults={
+                'status':row['status'],'date':row['date'],'file':files['file']
+                })
+            return Response("created")

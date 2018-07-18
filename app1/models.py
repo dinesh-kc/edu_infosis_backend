@@ -7,7 +7,11 @@ gender_choice = (
 			    ('2', 'Female'),
 			    ('3','Other')
 			    )
-
+marks_type_choice = (
+				('0','Select MarksType'),
+			    ('1','Theory'),
+			    ('2', 'Practical')
+			    )
 class BaseModel(models.Model):
 	date_created = models.DateTimeField(auto_now_add=True)
 	date_updated = models.DateTimeField(auto_now_add=True)
@@ -94,5 +98,43 @@ class Subject(BaseModel):
 	subject_name=models.CharField(max_length=65)
 	description=models.TextField(max_length=120)
 	syllabus=models.ForeignKey(Syllabus,on_delete=models.CASCADE)
+
+class Routine(BaseModel):
+	section=models.ForeignKey(Section,on_delete=models.CASCADE)
+	subject=models.ForeignKey(Subject,on_delete=models.CASCADE)
+	teacher=models.ForeignKey(Teacher,on_delete=models.CASCADE)
+	time_start=models.TimeField()
+	time_end=models.TimeField()
+
+class SubMarkType(BaseModel):
+	subject=models.ForeignKey(Subject,on_delete=models.CASCADE)
+	marks_type=models.IntegerField(choices=marks_type_choice,default=0)
+	total_marks=models.IntegerField()
+	pass_marks=models.IntegerField()
+
+class SubjectMarks(BaseModel):
+	_type=models.ForeignKey(SubMarkType,on_delete=models.CASCADE)
+	obtained_marks=models.FloatField()
+
+class Barcode(BaseModel):
+	name=models.CharField(max_length=65)
+
+
+def generateFilename(self,filename):
+    url = 'storage/class/%s/%s'%(self.id,filename)
+    return url
+
+class Attendance(BaseModel):
+	sec=models.ForeignKey(Section,on_delete=models.CASCADE)
+	student=models.ForeignKey(Student,on_delete=models.CASCADE)
+	status=models.BooleanField(default=False)
+	date=models.DateField()
+	file = models.FileField(upload_to=generateFilename, blank=True, null=True)
+
+
+
+
+	
+
 	
 
