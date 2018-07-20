@@ -1,7 +1,7 @@
 from django.shortcuts import render
 #from django.contrib.auth.models import StdRegister
 from app1.models import User, Student,Teacher,Class, ClassStudent,Parents,Accountant,Section,SectionStudent,\
-Syllabus,Subject,Routine,SubjectMarks,SubMarkType,Barcode,Attendance
+Syllabus,Subject,Routine,SubjectMarks,SubMarkType,Barcode,Attendance,Payment
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -12,7 +12,7 @@ from app1.modules.barcode import Code128##For Barcode
 from app1.serializers import StudentSerializer,TeacherSerializer, \
 ClassSerializer,ClassStudentSerializer,ParentSerializer,AccountantSerializer,SectionSerializer,\
 SectionStudentSerializer,SyllabusSerializer,SubjectSerializer,RoutineSerializer,SubjectMarksSerializer,\
-BarcodeSerializer,AttendanceSerializer
+BarcodeSerializer,AttendanceSerializer,PaymentSerializer
 
 class StudentViewset(viewsets.ModelViewSet):
     queryset = Student.objects.all()
@@ -41,6 +41,18 @@ class StudentViewset(viewsets.ModelViewSet):
         student = Student.objects.create(user_id=user.id)
 
         return Response(row)
+
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.name = request.data.get("name")
+        instance.save()
+
+        serializer = self.get_serializer(instance)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
             
             
     # def validate(self, data):
@@ -50,7 +62,6 @@ class StudentViewset(viewsets.ModelViewSet):
     #     return data
 
     
-
 class TeacherViewset(viewsets.ModelViewSet):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
@@ -109,6 +120,8 @@ class ClassStudentViewset(viewsets.ModelViewSet):
             ClassStudent.objects.get_or_create(student_id=id, _class_id=self.kwargs['class_pk'])
             
             return Response(id)
+
+
 
 
 ## For Parents
@@ -321,9 +334,10 @@ class AttendanceViewset(viewsets.ModelViewSet):
         #serializer=self.get_serializer(data=request.POST)
         #serializer.is_valid(raise_exception=True)
 
-        files = request.FILES
+        #files = request.FILES
 
-        row=request.POST #serializer.data
+        row=request.POST 
+        # row=serializer.data
         try:
             _Section=Section.objects.get(sec_pk)
             _Student=Student.objects.get(student_pk)
@@ -331,6 +345,27 @@ class AttendanceViewset(viewsets.ModelViewSet):
             return Response("Sorry Sec id And Student id not found")
         else:
             Attendance.objects.get_or_create(sec_id=section_pk,student_id=student_pk,defaults={
-                'status':row['status'],'date':row['date'],'file':files['file']
+                'status':row['status'],'date':row['date']
                 })
+            #'file':files['file'
             return Response("created")
+
+    # def list(self, request, section_pk):
+    #     data=request.get
+    #     return Response([{'id':'testingingeisngie'}])
+
+class PaymentViewset(viewsets.ModelViewSet):
+    queryset=Payment.objects.all()
+    serializer_class=PaymentSerializer
+
+    def create(self,request):
+        serializer=self.get_serializer(data=request.POST)
+        serializer.is_valid(raise_exception=True)
+
+        row=serializer.data
+        
+        Payment.objects.get_or_create(student_id=row['student_id'],defaults={
+            'pay_amount':row['pay_amount'],'description':row['description'],'date_paid':row['date_paid']
+            })
+        return Response("created")
+      

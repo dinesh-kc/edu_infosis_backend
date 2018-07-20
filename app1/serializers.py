@@ -1,5 +1,5 @@
 from app1.models import User,Student,Teacher,Class,ClassStudent,Parents,Accountant,Section,SectionStudent,\
-Syllabus,Subject,Routine,SubMarkType,SubjectMarks,Barcode,Attendance
+Syllabus,Subject,Routine,SubMarkType,SubjectMarks,Barcode,Attendance,Payment
 
 from rest_framework import serializers
 
@@ -22,6 +22,7 @@ class StudentSerializer(serializers.HyperlinkedModelSerializer):
 			'date_of_birth',
 			'user',
 			)
+
 
 ###Serializer Class for Teacher
 
@@ -150,10 +151,16 @@ class AttendanceSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model=Attendance
 		fields=(
-			'sec_id','student_id','status','date','file',
+			'sec_id','student_id','status','date',#'file',
 
 			)
 	
 
-	
+class PaymentSerializer(serializers.HyperlinkedModelSerializer):
+	student_id=serializers.IntegerField()
+	class Meta:
+		model=Payment
+		fields=('student_id','pay_amount','description','date_paid',)
+
+
 

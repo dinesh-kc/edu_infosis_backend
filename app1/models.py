@@ -129,7 +129,13 @@ class Attendance(BaseModel):
 	student=models.ForeignKey(Student,on_delete=models.CASCADE)
 	status=models.BooleanField(default=False)
 	date=models.DateField()
-	file = models.FileField(upload_to=generateFilename, blank=True, null=True)
+	#file = models.FileField(upload_to=generateFilename, blank=True, null=True)
+
+class Payment(BaseModel):
+	student=models.ForeignKey(Student,on_delete=models.CASCADE)
+	pay_amount=models.IntegerField()
+	description=models.TextField(max_length=200)
+	date_paid=models.DateTimeField()
 
 
 
