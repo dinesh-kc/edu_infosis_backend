@@ -9,7 +9,24 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 		model = User
 		fields=('full_name','addresss','phoneno','email','password','re_password','gender')
 
-#
+class UserUpateSerializer(serializers.ModelSerializer):
+	full_name=serializers.CharField(required=False)
+	addresss=serializers.CharField(required=False)
+	email=serializers.EmailField(required=False)
+	password=serializers.CharField(required=False)
+	re_password=serializers.CharField(required=False)
+	gender=serializers.IntegerField(required=False)
+	class Meta:
+		model=User
+		fields=(
+			'full_name',
+			'addresss',
+			'phoneno',
+			'email',
+			'password',
+			're_password',
+			'gender',
+			)
 ##Serializer Class for Student 
 class StudentSerializer(serializers.HyperlinkedModelSerializer):
 	user = UserSerializer()
@@ -22,6 +39,13 @@ class StudentSerializer(serializers.HyperlinkedModelSerializer):
 			'date_of_birth',
 			'user',
 			)
+
+class StudentUpdateSerializer(serializers.ModelSerializer):
+	father_name = serializers.CharField(required=False)
+	mother_name = serializers.CharField(required=False)
+	class Meta:
+		model = Student
+		fields = ('father_name','mother_name',)
 
 
 ###Serializer Class for Teacher
@@ -37,6 +61,12 @@ class TeacherSerializer(serializers.HyperlinkedModelSerializer):
 
 			)
 ####Serializer  To Add Class
+class TeacherUpdateSerializer(serializers.ModelSerializer):
+	user=UserUpateSerializer()
+	qualification=serializers.CharField(required=False)
+	class Meta:
+		model=Teacher
+		fields=('qualification','user',)
 
 class ClassSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
@@ -57,9 +87,15 @@ class ParentSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model=Parents
 		fields=(
+			
 			'user',
-
+			
 			)
+class ParentUpdateSerializer(serializers.HyperlinkedModelSerializer):
+	user=UserUpateSerializer()
+	class Meta:
+		model=Parents
+		fields=('user',)
 
 
 class AccountantSerializer(serializers.HyperlinkedModelSerializer):
@@ -70,10 +106,19 @@ class AccountantSerializer(serializers.HyperlinkedModelSerializer):
 			'user',
 
 			)
+class AccountantUpdatserializer(serializers.HyperlinkedModelSerializer):
+	user=UserUpateSerializer()
+	class Meta:
+		model=Accountant
+		fields=('user',)
 
 class SectionSerializer(serializers.HyperlinkedModelSerializer):
 	#user=UserSerializer()
-	class_id=serializers.IntegerField()
+	class_id=serializers.SerializerMethodField()
+
+	def get_class_id(self, obj):
+		return obj._class_id
+		
 	class Meta:
 		model=Section
 		fields=(

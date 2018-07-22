@@ -12,11 +12,14 @@ from app1.modules.barcode import Code128##For Barcode
 from app1.serializers import StudentSerializer,TeacherSerializer, \
 ClassSerializer,ClassStudentSerializer,ParentSerializer,AccountantSerializer,SectionSerializer,\
 SectionStudentSerializer,SyllabusSerializer,SubjectSerializer,RoutineSerializer,SubjectMarksSerializer,\
-BarcodeSerializer,AttendanceSerializer,PaymentSerializer
+BarcodeSerializer,AttendanceSerializer,PaymentSerializer,StudentUpdateSerializer,TeacherUpdateSerializer,\
+ParentUpdateSerializer,AccountantUpdatserializer
 
 class StudentViewset(viewsets.ModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
+
+    http_methods = ['get', 'post','put',]
 
 
     def create(self, request):
@@ -35,6 +38,7 @@ class StudentViewset(viewsets.ModelViewSet):
             defaults={'full_name':row['user']['full_name'],'addresss':row['user']['addresss'],
             'phoneno':row['user']['phoneno'],'password':row['user']['password'] ,'re_password':row['user']['re_password'],
             'gender':row['user']['gender'] ,'username':username})
+
         if created == False:
             return Response({'message':'Sorry the student is already registered.'})
        
@@ -42,26 +46,31 @@ class StudentViewset(viewsets.ModelViewSet):
 
         return Response(row)
 
+    # def update(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     serializer = StudentUpdateSerializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     instance.father_name = request.data.get("father_name")
+    #     instance.save()
+    #     return Response(serializer.data)
+    def update(self,request,*args,**kwargs):
+        instance=self.get_object()
+        serializer=StudentUpdateSerializer(data=request.data)
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.name = request.data.get("name")
-        instance.save()
-
-        serializer = self.get_serializer(instance)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
 
+        data = serializer.data
+        if data.get('father_name', False):
+            instance.father_name = data.get('father_name')
+
+        if data.get('mother_name', False):
+            instance.mother_name = data.get('mother_name')
+        
+        instance.save()
         return Response(serializer.data)
-            
-            
-    # def validate(self, data):
-    #     if data.get('password') != data.get('re_password'):
-    #         raise serializers.ValidationError("Those passwords don't match.")
+       
 
-    #     return data
 
-    
 class TeacherViewset(viewsets.ModelViewSet):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
@@ -85,6 +94,36 @@ class TeacherViewset(viewsets.ModelViewSet):
             
         teacher=Teacher.objects.create(user_id=user.id)
         return Response(row)
+
+
+
+
+    def update(self,request,*args,**kwargs):
+        instance=self.get_object()
+        serializer=TeacherUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data=serializer.data
+
+        user = data.get('user', False)
+        if user:
+            if user.get('full_name',False):
+                instance.user.full_name=user.get('full_name')
+            if user.get('addresss',False):
+                instance.user.addresss=user.get('addresss')
+            if user.get('phoneno',False):
+                instance.user.phoneno=user.get('phoneno')
+            if user.get('email',False):
+                instance.user.email=user.get('email')
+            if user.get('password',False):
+                instance.user.password=user.get(password)
+            if user.get('re_password',False):
+                instance.user.re_password=user.get(re_password)
+            instance.user.save()
+
+        if data.get('qualification',False):
+            instance.qualification=data.get('qualification')
+        instance.save()
+        return Response(serializer.data)
 
 class ClassViewset(viewsets.ModelViewSet):
     queryset=Class.objects.all()
@@ -144,7 +183,7 @@ class ParentViewset(viewsets.ModelViewSet):
 
         email=username=row['user']['email']
 
-        user, created = User.objects.get_or_create(email=email, 
+        user, created = User.objects.get_or_create(email=email,
             defaults={'full_name':row['user']['full_name'],'addresss':row['user']['addresss'],
             'phoneno':row['user']['phoneno'],'password':row['user']['password'] ,'re_password':row['user']['re_password'],
             'gender':row['user']['gender'] ,'username':username})
@@ -154,6 +193,29 @@ class ParentViewset(viewsets.ModelViewSet):
         parent=Parents.objects.create(user_id=user.id)
         return Response(row)
 
+    def update(self,request,*args,**kwargs):
+        instance=self.get_object()
+        serializer=ParentUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data=serializer.data
+
+        user = data.get('user', False)
+        if user:
+            if user.get('full_name',False):
+                instance.user.full_name=user.get('full_name')
+            if user.get('addresss',False):
+                instance.user.addresss=user.get('addresss')
+            if user.get('phoneno',False):
+                instance.user.phoneno=user.get('phoneno')
+            if user.get('email',False):
+                instance.user.email=user.get('email')
+            if user.get('password',False):
+                instance.user.password=user.get(password)
+            if user.get('re_password',False):
+                instance.user.re_password=user.get(re_password)
+            instance.user.save()
+            
+        return Response(serializer.data)
 ### For Accountant
 
 class AccountantViewset(viewsets.ModelViewSet):
@@ -183,6 +245,29 @@ class AccountantViewset(viewsets.ModelViewSet):
             
         parent=Parents.objects.create(user_id=user.id)
         return Response(row)
+    def update(self,request,*args,**kwargs):
+        instance=self.get_object()
+        serializer=AccountantUpdatserializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data=serializer.data
+        user=data.get('user',False)
+        if user:
+            if user.get('full_name',False):
+                instance.user.full_name=user.get('full_name')
+            if user.get('addresss',False):
+                instance.user.addresss=user.get('addresss')
+            if user.get('phoneno',False):
+                instance.user.phoneno=user.get('phoneno')
+            if user.get('email',False):
+                instance.user.email=user.get('email')
+            if user.get('password',False):
+                instance.user.password=user.get('password')
+            if user.get('re_password',False):
+                instance.user.re_password=user.get('re_password')
+            instance.user.save()
+
+        return Response(serializer.data)
+
 
 class ClassSectionViewset(viewsets.ModelViewSet):
     queryset=Section.objects.all()
