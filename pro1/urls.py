@@ -22,6 +22,8 @@ router.register(r'routine',views.RoutineViewset)
 router.register(r'marksheet',views.SubjectMarkViewset)
 router.register(r'barcode',views.BarcodeViewset)
 router.register(r'payment',views.PaymentViewset)
+router.register(r'exam',views.ExamViewset)
+router.register(r'book',views.BookViewset)
 # router.register(r'syllabus',views.SyllabusViewset)
 ##router.register(r'class/(?P<id>[0-9]+)/student',  views.ClassStudentViewset, 'class-student')
 

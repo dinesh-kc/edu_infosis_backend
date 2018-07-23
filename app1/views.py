@@ -1,7 +1,7 @@
 from django.shortcuts import render
 #from django.contrib.auth.models import StdRegister
 from app1.models import User, Student,Teacher,Class, ClassStudent,Parents,Accountant,Section,SectionStudent,\
-Syllabus,Subject,Routine,SubjectMarks,SubMarkType,Barcode,Attendance,Payment
+Syllabus,Subject,Routine,SubjectMarks,SubMarkType,Barcode,Attendance,Payment,Exam,Book
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -13,8 +13,7 @@ from app1.serializers import StudentSerializer,TeacherSerializer, \
 ClassSerializer,ClassStudentSerializer,ParentSerializer,AccountantSerializer,SectionSerializer,\
 SectionStudentSerializer,SyllabusSerializer,SubjectSerializer,RoutineSerializer,SubjectMarksSerializer,\
 BarcodeSerializer,AttendanceSerializer,PaymentSerializer,StudentUpdateSerializer,TeacherUpdateSerializer,\
-ParentUpdateSerializer,AccountantUpdatserializer
-
+ParentUpdateSerializer,AccountantUpdatserializer,ClassUpdateSerializer,ExamSerializer,BookSerializer,BookUpdateSerializer
 class StudentViewset(viewsets.ModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
@@ -141,6 +140,20 @@ class ClassViewset(viewsets.ModelViewSet):
     #         ClassStudent.objects.get_or_create(student_id=sid, Class_id=id)
 
     #     return Response(row)
+    def update(self,request,*args,**kwargs):
+        instance=self.get_object()
+        serializer=ClassUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data=serializer.data
+        if data.get('name',False):
+            instance.name=data.get('name')
+        if data.get('max_capacity',False):
+            instance.max_capacity=data.get('max_capacity')
+        if data.get('description',False):
+            instance.description=data.get('description')
+
+        instance.save()
+        return Response(serializer.data)
 
 
 class ClassStudentViewset(viewsets.ModelViewSet):
@@ -158,12 +171,21 @@ class ClassStudentViewset(viewsets.ModelViewSet):
         for id in student_ids:
             ClassStudent.objects.get_or_create(student_id=id, _class_id=self.kwargs['class_pk'])
             
-            return Response(id)
+        return Response(id)
+
+    def list(self,request, class_pk):
+
+        students = ClassStudent.objects.filter(_class_id=class_pk)
+        output = []
+        for student in students:
+            output.append (
+                    {'id':student.id
+
+                    }
+                )
+        return Response(output)
 
 
-
-
-## For Parents
 
 
 class ParentViewset(viewsets.ModelViewSet):
@@ -278,7 +300,7 @@ class ClassSectionViewset(viewsets.ModelViewSet):
         #print(serializer)
         serializer.is_valid(raise_exception=True)
         row=serializer.data
-        print(row)
+        #print(row)
         section_name=row['section_name']
        
         ## to check class id
@@ -293,6 +315,7 @@ class ClassSectionViewset(viewsets.ModelViewSet):
             defaults={'section_description':row['section_description']})
            
         return Response({'message':'created'})
+    #def update(self,requet,*args)
 
 
 class SectionViewset(viewsets.ModelViewSet):
@@ -453,4 +476,42 @@ class PaymentViewset(viewsets.ModelViewSet):
             'pay_amount':row['pay_amount'],'description':row['description'],'date_paid':row['date_paid']
             })
         return Response("created")
-      
+
+
+class ExamViewset(viewsets.ModelViewSet):
+    queryset=Exam.objects.all()
+    serializer_class=ExamSerializer
+
+    def create(self,request):
+        serializer=self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        row=serializer.data
+        Exam.objects.get_or_create(name=row['name'],defaults={'date':row['date'],'description':row['description']})
+        return Response(serializer.data)
+
+class BookViewset(viewsets.ModelViewSet):
+    queryset=Book.objects.all()
+    serializer_class=BookSerializer
+
+    def create(self,request):
+        serializer=self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        row=serializer.data
+        Book.objects.get_or_create(_class_id=row['_class_id'],defaults={'name':row['name'],'description':row['description'],'author':row['author']})
+        return Response(serializer.data)
+
+    def update(self,request,*args,**kwargs):
+        instance=self.get_object()
+        serializer=BookUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data=serializer.data
+
+        if data.get('name',False):
+            instance.name=data.get('name')
+        if data.get('author',False):
+            instance.author=data.get('author')
+        if data.get('description',False):
+            instance.description=data.get('description')
+        instance.save()
+        return Response(serializer.data)
+

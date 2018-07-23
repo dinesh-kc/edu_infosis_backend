@@ -1,5 +1,5 @@
 from app1.models import User,Student,Teacher,Class,ClassStudent,Parents,Accountant,Section,SectionStudent,\
-Syllabus,Subject,Routine,SubMarkType,SubjectMarks,Barcode,Attendance,Payment
+Syllabus,Subject,Routine,SubMarkType,SubjectMarks,Barcode,Attendance,Payment,Exam,Book
 
 from rest_framework import serializers
 
@@ -7,7 +7,7 @@ from rest_framework import serializers
 class UserSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model = User
-		fields=('full_name','addresss','phoneno','email','password','re_password','gender')
+		fields=('full_name','id','addresss','phoneno','email','password','re_password','gender')
 
 class UserUpateSerializer(serializers.ModelSerializer):
 	full_name=serializers.CharField(required=False)
@@ -71,16 +71,25 @@ class TeacherUpdateSerializer(serializers.ModelSerializer):
 class ClassSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model=Class
-		fields=('id','name','max_capacity','description','image_1',)
+		fields=('id','name','max_capacity','description',)
 
 #Serializer For Class Student
+class ClassUpdateSerializer(serializers.HyperlinkedModelSerializer):
+	name=serializers.CharField(required=False)
+	max_capacity=serializers.IntegerField(required=False)
+	description=serializers.CharField(required=False)
+	class Meta:
+		model=Class
+		fields=('id','name','max_capacity','description',)
 
 class ClassStudentSerializer(serializers.HyperlinkedModelSerializer):
 	students = serializers.ListField()
+	_class_id=serializers.IntegerField()
 	class Meta:
-		fields=('students',)
+		model=ClassStudent
+		fields=('students','_class_id', )
 
-#serializers For Parents
+
 
 class ParentSerializer(serializers.HyperlinkedModelSerializer):
 	user = UserSerializer()
@@ -209,3 +218,23 @@ class PaymentSerializer(serializers.HyperlinkedModelSerializer):
 
 
 
+class ExamSerializer(serializers.HyperlinkedModelSerializer):
+	class Meta:
+		model=Exam
+		fields=('name','date','description',)
+
+class BookSerializer(serializers.HyperlinkedModelSerializer):
+	_class_id=serializers.IntegerField()
+
+	class Meta:
+		model=Book
+		fields=('name','author','description','_class_id',)
+
+class BookUpdateSerializer(serializers.HyperlinkedModelSerializer):
+	name=serializers.CharField(required=False)
+	author=serializers.CharField(required=False)
+	description=serializers.CharField(required=False)
+
+	class Meta:
+		model=Book
+		fields=('name','author','description',)

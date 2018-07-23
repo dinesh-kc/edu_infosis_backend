@@ -61,7 +61,7 @@ class Class(BaseModel):
 	name=models.CharField(max_length=50)
 	max_capacity=models.IntegerField()
 	description=models.TextField(max_length=120)
-	image_1 = models.ImageField(blank=True,default='',upload_to='questions/')
+	#image_1 = models.ImageField(blank=True,default='',upload_to='questions/')
 		
 
 class ClassStudent(BaseModel):
@@ -136,7 +136,16 @@ class Payment(BaseModel):
 	pay_amount=models.IntegerField()
 	description=models.TextField(max_length=200)
 	date_paid=models.DateTimeField()
-
+class Exam(BaseModel):
+	name=models.CharField(max_length=65)
+	date=models.DateTimeField()
+	description=models.TextField(max_length=320)
+	
+class Book(BaseModel):
+	name=models.CharField(max_length=65)
+	author=models.CharField(max_length=65)
+	description=models.CharField(max_length=300)
+	_class=models.ForeignKey(Class,on_delete=models.CASCADE)
 
 
 
