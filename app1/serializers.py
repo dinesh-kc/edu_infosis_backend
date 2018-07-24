@@ -1,5 +1,5 @@
 from app1.models import User,Student,Teacher,Class,ClassStudent,Parents,Accountant,Section,SectionStudent,\
-Syllabus,Subject,Routine,SubMarkType,SubjectMarks,Barcode,Attendance,Payment,Exam,Book
+Syllabus,Subject,Routine,SubMarkType,SubjectMarks,Barcode,Attendance,Payment,Exam,Book,MyPhoto
 
 from rest_framework import serializers
 
@@ -7,45 +7,45 @@ from rest_framework import serializers
 class UserSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model = User
-		fields=('full_name','id','addresss','phoneno','email','password','re_password','gender')
+		fields=('full_name','id','addresss','phoneno','email','gender',)
 
 class UserUpateSerializer(serializers.ModelSerializer):
 	full_name=serializers.CharField(required=False)
 	addresss=serializers.CharField(required=False)
-	email=serializers.EmailField(required=False)
-	password=serializers.CharField(required=False)
-	re_password=serializers.CharField(required=False)
-	gender=serializers.IntegerField(required=False)
+	phoneno=serializers.IntegerField(required=False)
 	class Meta:
 		model=User
 		fields=(
 			'full_name',
 			'addresss',
 			'phoneno',
-			'email',
-			'password',
-			're_password',
+			'email'
 			'gender',
 			)
+class UserPostSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=User
+		fields=('full_name','addresss','gender')
 ##Serializer Class for Student 
 class StudentSerializer(serializers.HyperlinkedModelSerializer):
-	user = UserSerializer()
+	user = UserPostSerializer()
 	class Meta:
 		model=Student
 		fields=(
-			'id',
-			'father_name',
-			'mother_name',
-			'date_of_birth',
+			# 'id',
+			# 'father_name',
+			# 'mother_name',
+			# 'date_of_birth',
 			'user',
 			)
 
 class StudentUpdateSerializer(serializers.ModelSerializer):
+	user=UserUpateSerializer()
 	father_name = serializers.CharField(required=False)
 	mother_name = serializers.CharField(required=False)
 	class Meta:
 		model = Student
-		fields = ('father_name','mother_name',)
+		fields = ('father_name','mother_name','user',)
 
 
 ###Serializer Class for Teacher
@@ -96,7 +96,7 @@ class ParentSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model=Parents
 		fields=(
-			
+			'id',
 			'user',
 			
 			)
@@ -238,3 +238,9 @@ class BookUpdateSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model=Book
 		fields=('name','author','description',)
+
+
+class MyPhotoSerializer(serializers.HyperlinkedModelSerializer):
+	class Meta:
+		model=MyPhoto
+		fields=('id','image',)

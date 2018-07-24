@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+# from django.forms.fields import ImageField
 
 gender_choice = (
 				('0','Select Gender'),
@@ -150,6 +151,6 @@ class Book(BaseModel):
 
 
 	
-
-	
+class MyPhoto(BaseModel):
+	image = models.ImageField(upload_to='storage')
 
