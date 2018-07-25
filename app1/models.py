@@ -25,8 +25,7 @@ class User(AbstractUser, BaseModel):
 	addresss=models.CharField(max_length=40)
 	phoneno=models.IntegerField(null=True, blank=True)
 	email=models.EmailField()
-	password=models.CharField(max_length=40)
-	re_password=models.CharField(max_length=40)
+
 
 
 	gender=models.IntegerField(choices=gender_choice,default='0')
@@ -35,9 +34,9 @@ class User(AbstractUser, BaseModel):
 class Student(BaseModel):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	
-	father_name=models.CharField(max_length=64)
-	mother_name=models.CharField(max_length=60)
-	date_of_birth=models.DateField(null=True)
+	# father_name=models.CharField(max_length=64,blank=True)
+	# mother_name=models.CharField(max_length=60,blank=True)
+	# date_of_birth=models.DateField(null=True,blank=True)
 
 	def __str__(self):
 		return self.user.full_name
@@ -74,6 +73,8 @@ class ClassStudent(BaseModel):
 class Parents(BaseModel):
 	user=models.ForeignKey(User,on_delete=models.CASCADE)
 
+
+
 class Accountant(BaseModel):
 	user=models.ForeignKey(User,on_delete=models.CASCADE)
 
@@ -98,7 +99,7 @@ class Syllabus(BaseModel):
 class Subject(BaseModel):
 	subject_name=models.CharField(max_length=65)
 	description=models.TextField(max_length=120)
-	syllabus=models.ForeignKey(Syllabus,on_delete=models.CASCADE)
+	_class=models.ForeignKey(Class,on_delete=models.CASCADE)
 
 class Routine(BaseModel):
 	section=models.ForeignKey(Section,on_delete=models.CASCADE)
@@ -129,14 +130,14 @@ class Attendance(BaseModel):
 	sec=models.ForeignKey(Section,on_delete=models.CASCADE)
 	student=models.ForeignKey(Student,on_delete=models.CASCADE)
 	status=models.BooleanField(default=False)
-	date=models.DateField()
+
 	#file = models.FileField(upload_to=generateFilename, blank=True, null=True)
 
 class Payment(BaseModel):
 	student=models.ForeignKey(Student,on_delete=models.CASCADE)
 	pay_amount=models.IntegerField()
 	description=models.TextField(max_length=200)
-	date_paid=models.DateTimeField()
+	
 class Exam(BaseModel):
 	name=models.CharField(max_length=65)
 	date=models.DateTimeField()

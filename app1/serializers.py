@@ -19,20 +19,20 @@ class UserUpateSerializer(serializers.ModelSerializer):
 			'full_name',
 			'addresss',
 			'phoneno',
-			'email'
-			'gender',
+			
+			
 			)
 class UserPostSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=User
-		fields=('full_name','addresss','gender')
+		fields=('full_name','addresss')
 ##Serializer Class for Student 
 class StudentSerializer(serializers.HyperlinkedModelSerializer):
 	user = UserPostSerializer()
 	class Meta:
 		model=Student
 		fields=(
-			# 'id',
+			
 			# 'father_name',
 			# 'mother_name',
 			# 'date_of_birth',
@@ -66,7 +66,7 @@ class TeacherUpdateSerializer(serializers.ModelSerializer):
 	qualification=serializers.CharField(required=False)
 	class Meta:
 		model=Teacher
-		fields=('qualification','user',)
+		fields=('qualification','user','id',)
 
 class ClassSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
@@ -84,10 +84,10 @@ class ClassUpdateSerializer(serializers.HyperlinkedModelSerializer):
 
 class ClassStudentSerializer(serializers.HyperlinkedModelSerializer):
 	students = serializers.ListField()
-	_class_id=serializers.IntegerField()
+	
 	class Meta:
 		model=ClassStudent
-		fields=('students','_class_id', )
+		fields=('students', )
 
 
 
@@ -104,34 +104,34 @@ class ParentUpdateSerializer(serializers.HyperlinkedModelSerializer):
 	user=UserUpateSerializer()
 	class Meta:
 		model=Parents
-		fields=('user',)
+		fields=('user','id',)
 
 
 class AccountantSerializer(serializers.HyperlinkedModelSerializer):
 	user = UserSerializer()
 	class Meta:
-		model=Parents
+		model=Accountant
 		fields=(
-			'user',
+			'user','id',
 
 			)
 class AccountantUpdatserializer(serializers.HyperlinkedModelSerializer):
 	user=UserUpateSerializer()
 	class Meta:
 		model=Accountant
-		fields=('user',)
+		fields=('user','id',)
 
 class SectionSerializer(serializers.HyperlinkedModelSerializer):
 	#user=UserSerializer()
-	class_id=serializers.SerializerMethodField()
+	# _class_id=serializers.SerializerMethodField()
 
-	def get_class_id(self, obj):
-		return obj._class_id
-		
+	# def get_class_id(self, obj):
+	# 	return obj._class_id
+	#_class_id=serializers.IntegerField()
 	class Meta:
 		model=Section
 		fields=(
-			'section_name','section_description','class_id'
+			'id','section_name','section_description',
 
 			)
 
@@ -140,23 +140,23 @@ class SectionStudentSerializer(serializers.HyperlinkedModelSerializer):
 
 	class Meta:
 		model=SectionStudent
-		fields=('student_id',)
+		fields=('student_id','id',)
 
 class SyllabusSerializer(serializers.HyperlinkedModelSerializer):
 	
 	class Meta:
 		model=Syllabus
 		fields=(
-			'title','description',
+			'title','description','id',
 
 			)
 
 class SubjectSerializer(serializers.HyperlinkedModelSerializer):
-	syllabus_id=serializers.IntegerField()
+	
 	class Meta:
 		model=Subject
 		fields=(
-			'subject_name','description','syllabus_id',
+			'subject_name','description','id',
 
 			)
 
@@ -168,7 +168,7 @@ class RoutineSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model=Routine
 		fields=(
-			'section_id','subject_id','teacher_id','time_start','time_end',
+			'section_id','subject_id','teacher_id','time_start','time_end','id',
 
 			)
 class SubMarkTypeSerializer(serializers.HyperlinkedModelSerializer):
@@ -176,7 +176,7 @@ class SubMarkTypeSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model=SubMarkType
 		fields=(
-			'subject_id','marks_type','total_marks','pass_marks',
+			'subject_id','marks_type','total_marks','pass_marks','id',
 			)
 
 class SubjectMarksSerializer(serializers.HyperlinkedModelSerializer):
@@ -185,7 +185,7 @@ class SubjectMarksSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model=SubjectMarks
 		fields=(
-			'_type_id','obtained_marks','marks_type_detail',
+			'_type_id','obtained_marks','marks_type_detail','id',
 			)
 	
 
@@ -193,19 +193,21 @@ class BarcodeSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model=Barcode
 		fields=(
-			'name',
+			'name','id',
 			)
 	
 
 class AttendanceSerializer(serializers.HyperlinkedModelSerializer):
-	sec_id=serializers.IntegerField()
+	#sec_id=serializers.IntegerField()
 	student_id=serializers.IntegerField()
-	file = serializers.FileField()
+	date = serializers.CharField(source='date_created')
+	#file = serializers.FileField()
 
 	class Meta:
 		model=Attendance
 		fields=(
-			'sec_id','student_id','status','date',#'file',
+			'student_id','status','date',#'file', 
+			'id',
 
 			)
 	
@@ -214,21 +216,21 @@ class PaymentSerializer(serializers.HyperlinkedModelSerializer):
 	student_id=serializers.IntegerField()
 	class Meta:
 		model=Payment
-		fields=('student_id','pay_amount','description','date_paid',)
+		fields=('student_id','pay_amount','description','id',)
 
 
 
 class ExamSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model=Exam
-		fields=('name','date','description',)
+		fields=('name','id','date','description',)
 
 class BookSerializer(serializers.HyperlinkedModelSerializer):
 	_class_id=serializers.IntegerField()
 
 	class Meta:
 		model=Book
-		fields=('name','author','description','_class_id',)
+		fields=('name','author','description','_class_id','id',)
 
 class BookUpdateSerializer(serializers.HyperlinkedModelSerializer):
 	name=serializers.CharField(required=False)
@@ -237,7 +239,7 @@ class BookUpdateSerializer(serializers.HyperlinkedModelSerializer):
 
 	class Meta:
 		model=Book
-		fields=('name','author','description',)
+		fields=('name','author','description','id',)
 
 
 class MyPhotoSerializer(serializers.HyperlinkedModelSerializer):

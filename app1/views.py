@@ -25,7 +25,6 @@ class StudentViewset(viewsets.ModelViewSet):
 
 
     def create(self, request):
-       
         serializer=StudentSerializer(data=request.data)
         serializer.is_valid()
         row = serializer.data
@@ -33,20 +32,19 @@ class StudentViewset(viewsets.ModelViewSet):
         full_name = user['full_name']
         first_name = full_name.split(' ')[0]
 
-        email = first_name + '@schoolX.com'
+        #email = first_name + '@schoolX.com'
 
-        _e = User.objects.filter(email=email)
-        x=1
-        if _e:
-            x=1
-            str(x)
-            email = first_name + 'x' + '@schoolX.com'
-            x+=1
 
-        email = username = email
+        # _e = User.objects.filter(email=email)
+        # if _e:
+        #     email = first_name + str(+count) + '@schoolX.com'
+        emailpattern =  '{}(\d*)@schoolx.com'.format(first_name)
+        count = User.objects.filter(email__iregex=emailpattern).count()
+        email = '{}{}@schoolx.com'.format(first_name, str(count) if count > 0 else "")
+
         
-        user,created = User.objects.get_or_create(email=email, 
-            defaults={'full_name':row['user']['full_name'],'addresss':row['user']['addresss'],'username':username})
+        user,created = User.objects.get_or_create(email= email, 
+            defaults={'full_name':row['user']['full_name'],'addresss':row['user']['addresss']})
         student = Student.objects.create(user_id=user.id)
 
         return Response({'email':email})
@@ -109,13 +107,13 @@ class TeacherViewset(viewsets.ModelViewSet):
 
         row=serializer.data
         email=username=row['user']['email']
-        if user['password'] != user['re_password']:
-            return Response({'message':'pw not matched'})
+        # if user['password'] != user['re_password']:
+        #     return Response({'message':'pw not matched'})
 
 
         user, created = User.objects.get_or_create(email=email, 
             defaults={'full_name':row['user']['full_name'],'addresss':row['user']['addresss'],
-            'phoneno':row['user']['phoneno'],'password':row['user']['password'] ,'re_password':row['user']['re_password'],
+            'phoneno':row['user']['phoneno'],
             'gender':row['user']['gender'] ,'username':username})
         if created == False:
             return Response({'message':'sorry the Teacher is already exist'})
@@ -129,7 +127,7 @@ class TeacherViewset(viewsets.ModelViewSet):
     def update(self,request,*args,**kwargs):
         instance=self.get_object()
         serializer=TeacherUpdateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        serializer.is_valid()
         data=serializer.data
 
         user = data.get('user', False)
@@ -142,10 +140,6 @@ class TeacherViewset(viewsets.ModelViewSet):
                 instance.user.phoneno=user.get('phoneno')
             if user.get('email',False):
                 instance.user.email=user.get('email')
-            if user.get('password',False):
-                instance.user.password=user.get(password)
-            if user.get('re_password',False):
-                instance.user.re_password=user.get(re_password)
             instance.user.save()
 
         if data.get('qualification',False):
@@ -273,28 +267,30 @@ class AccountantViewset(viewsets.ModelViewSet):
     queryset = Accountant.objects.all()
     serializer_class = AccountantSerializer
 
+    def get(self, request):
+        queryset = Accountant.objects.all()
+        serializer_class = AccountantSerializer
+        serializer=self.get_serializer(data=request.data)
+        return Response(serializer.data)
+
+
     def create(self,request):
         serializer=self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         row=serializer.data
-        #to verify password
-        user=row['user']
-        if user['password'] != user['re_password']:
-            return Response({'message':'pw not matched'})
-
-
+        
         email=username=row['user']['email']
 
         user, created = User.objects.get_or_create(email=email, 
             defaults={'full_name':row['user']['full_name'],'addresss':row['user']['addresss'],
-            'phoneno':row['user']['phoneno'],'password':row['user']['password'] ,'re_password':row['user']['re_password'],
+            'phoneno':row['user']['phoneno'],
             'gender':row['user']['gender'] ,'username':username})
 
         if created == False:
             return Response({'message':'sorry the Parents is already exist'})
             
-        parent=Parents.objects.create(user_id=user.id)
+        parent=Accountant.objects.create(user_id=user.id)
         return Response(row)
     def update(self,request,*args,**kwargs):
         instance=self.get_object()
@@ -378,12 +374,12 @@ class SyllabusViewset(viewsets.ModelViewSet):
     queryset = Syllabus.objects.all()
     serializer_class = SyllabusSerializer
 
-    def create(self,request,Class_pk):
+    def create(self,request,class_pk):
         serializer=self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         row=serializer.data
-        Syllabus.objects.get_or_create(_class_id=Class_pk,defaults={'title':'title','description':'description'})
+        Syllabus.objects.get_or_create(_class_id=class_pk,defaults={'title':row['title'],'description':row['description']})
 
         return Response(row)
 
@@ -392,12 +388,17 @@ class SubjectViewset(viewsets.ModelViewSet):
     queryset=Subject.objects.all()
     serializer_class=SubjectSerializer
 
-    def create(self,request):
+    def create(self,request,class_pk):
         serializer=self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        serializer.is_valid()
 
         row=serializer.data
-        Subject.objects.get_or_create(syllabus_id=syllabus_id,defaults={'subject_name':'subject_name','description':'description'})
+        Subject.objects.get_or_create(_class_id=class_pk,subject_name=row['subject_name'], defaults={'description':row['description']})
+
+        return Response(row)
+
+
+
 
 class RoutineViewset(viewsets.ModelViewSet):
     queryset=Routine.objects.all()
@@ -408,16 +409,16 @@ class RoutineViewset(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         row=serializer.data
-        try:
-            Section=Section.objects.get(section_pk)
-            Teacher=Teacher.objects.get(teacher_pk)
-            Subject=Subject.objects.get(subject_pk)
-        except:
-            return Response({'message':'sorry id doesnot exist'})
-        else:
-            Routine.objects.get_or_create(section_id=section_pk,subject_id=teacher_pk,teacher_id=subject_pk,
-            defaults={'time_start':row['time_start'],'time_end':row['time_end']})
-            return Response({'message':'created'})
+        # try:
+        #     Section=Section.objects.get(id=row['section_id'])
+        #     Teacher=Teacher.objects.get(id=row['teacher_id'])
+        #     Subject=Subject.objects.get(id=row['subject_id'])
+        # except:
+        #     return Response({'message':'sorry id doesnot exist'})
+        # else:
+        Routine.objects.get_or_create(section_id=row['section_id'],subject_id=row['subject_id'],teacher_id=row['teacher_id'],
+        defaults={'time_start':row['time_start'],'time_end':row['time_end']})
+        return Response({'message':'created'})
 
 class SubjectMarkViewset(viewsets.ModelViewSet):
     queryset=Routine.objects.all()
@@ -429,12 +430,12 @@ class SubjectMarkViewset(viewsets.ModelViewSet):
 
         row=serializer.data
         try:
-            SubMarkType=SubMarkType.objects.get(SubMarkType_pk)
+            SubMarkType=SubMarkType.objects.get(id=row['SubMarkType_id'])
 
         except:
             return Response({'message':'sorry'})
         else:
-            SubjectMarks.objects.get_or_create(_type_id=SubMarkType_pk,defaults={obtained_marks:row['obtained_marks'],marks_type:row['marks_type']})
+            SubjectMarks.objects.get_or_create(_type_id=row['SubMarkType_id'],defaults={obtained_marks:row['obtained_marks'],marks_type:row['marks_type']})
         return Response({'Created Successfully'})
 
 
@@ -459,34 +460,34 @@ class BarcodeViewset(viewsets.ModelViewSet):
         b, c = Barcode.objects.get_or_create(bar_code=code, defaults={'file':upload_dir+code+'.png'})
 
         return b
+# parser_classes = (FormParser, MultiPartParser)
 
 
 class AttendanceViewset(viewsets.ModelViewSet):
     queryset=Attendance.objects.all()
     serializer_class=AttendanceSerializer
-    parser_classes = (FormParser, MultiPartParser)
-
+   
     def create(self,request,section_pk):
         #print(request.POST)
         #print(request.FILES)
-        #serializer=self.get_serializer(data=request.POST)
-        #serializer.is_valid(raise_exception=True)
+        serializer=self.get_serializer(data=request.data)
+        serializer.is_valid()
 
         #files = request.FILES
 
-        row=request.POST 
-        # row=serializer.data
+        # row=request.POST 
+        row=serializer.data
         try:
-            _Section=Section.objects.get(sec_pk)
-            _Student=Student.objects.get(student_pk)
+            _Section=Section.objects.get(id=row['section_id'])
+            _Student=Student.objects.get(id=row['student_id'])
         except:
             return Response("Sorry Sec id And Student id not found")
         else:
-            Attendance.objects.get_or_create(sec_id=section_pk,student_id=student_pk,defaults={
-                'status':row['status'],'date':row['date']
+            Attendance.objects.get_or_create(sec_id=row['section_id'],student_id=row['student_id'],defaults={
+                'status':row['status']
                 })
             #'file':files['file'
-            return Response("created")
+            return Response("Present")
 
     # def list(self, request, section_pk):
     #     data=request.get
@@ -497,13 +498,13 @@ class PaymentViewset(viewsets.ModelViewSet):
     serializer_class=PaymentSerializer
 
     def create(self,request):
-        serializer=self.get_serializer(data=request.POST)
+        serializer=self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         row=serializer.data
         
         Payment.objects.get_or_create(student_id=row['student_id'],defaults={
-            'pay_amount':row['pay_amount'],'description':row['description'],'date_paid':row['date_paid']
+            'pay_amount':row['pay_amount'],'description':row['description'],
             })
         return Response("created")
 
