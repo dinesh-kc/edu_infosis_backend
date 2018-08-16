@@ -37,10 +37,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-     'app1',
+    #3rd party
+    'library',
+    'main',
+    'student',
+     # 'app1',
 
      'rest_framework',
-     'corsheaders',
+     # 'corsheaders',
        'drf_yasg',
 ]
 
@@ -127,6 +131,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-AUTH_USER_MODEL = 'app1.User'
+AUTH_USER_MODEL = 'main.User'
 
 CORS_ORIGIN_ALLOW_ALL = True
