@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'library',
     'main',
     'student',
+    'maintainance',
      # 'app1',
 
      'rest_framework',

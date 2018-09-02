@@ -66,6 +66,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^api/library/', include('library.urls')),
     url(r'^api/student/',include('student.urls')),
+    url(r'^api/maintainance/',include('maintainance.urls')),
+    url(r'^usertype/',include('main.urls')),
     
     url(r'^docs(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=None), name='schema-json'),
     url(r'^docs/$', schema_view.with_ui('swagger', cache_timeout=None), name='schema-swagger-ui'),
